@@ -1,5 +1,5 @@
 # Download candle data
-freqtrade download-data --pairs BTC/USDT ETH/USDT XRP/USDT --timerange 20190101-20231231 --timeframes 1m 5m　15m15m
+freqtrade download-data --pairs BTC/USDT ETH/USDT XRP/USDT --timerange 20190101-20231231 --timeframes 15m 30m
 
 # Backtest
 freqtrade backtesting --strategy SampleStrategy --timerange 20190101-20190201 --timeframe 5m
@@ -17,3 +17,20 @@ freqtrade trade --strategy MyStrategy
 freqtrade webserver
 
 docker compose -f docker-compose-webserver.yml up -d
+
+
+# Backtest strategies in user_data_test dir
+
+# 1 Get historical data
+freqtrade download-data --userdir /workspaces/freqtrade/user_data_test --pairs BTC/USDT ETH/USDT XRP/USDT --timerange 20241001-20241231 --timeframes 5m 15m 30m 1h
+
+# 2 Execute backtest with userdir
+freqtrade backtesting \
+    --userdir /workspaces/freqtrade/user_data_test \
+    --strategy Bandtastic \
+    --timerange 20241001-20241231
+
+freqtrade backtesting \
+    --userdir /workspaces/freqtrade/user_data_test \
+    --strategy CustomStoplossWithPSAR \
+    --timerange 20241001-20241231

@@ -17,6 +17,15 @@ freqtrade-profit-plot.html
 freqtrade/rpc/api_server/ui/*
 build_helpers/ta-lib/*
 
+user_data_test/*
+!user_data_test/strategies
+!user_data_test/notebooks
+!user_data_test/models
+!user_data_test/freqaimodels
+user_data_test/freqaimodels/*
+user_data_test/models/*
+user_data_test/notebooks/*
+
 # Macos related
 .DS_Store
 
