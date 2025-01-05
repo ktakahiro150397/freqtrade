@@ -15,3 +15,5 @@ freqtrade trade --strategy MyStrategy
 
 # Run webserver
 freqtrade webserver
+
+docker compose -f docker-compose-webserver.yml up -d
