@@ -1,6 +1,6 @@
 ---
 services:
-  freqtrade:
+  freqtrade-bot:
     image: freqtradeorg/freqtrade:stable
     # image: freqtradeorg/freqtrade:develop
     # Use plotting image
@@ -19,14 +19,14 @@ services:
     #   context: .
     #   dockerfile: "./docker/Dockerfile.custom"
     restart: unless-stopped
-    container_name: freqtrade
+    container_name: freqtrade-bot
     volumes:
       - "./user_data:/freqtrade/user_data"
     # Expose api on port 8080 (localhost only)
     # Please read the https://www.freqtrade.io/en/stable/rest-api/ documentation
     # for more information.
     ports:
-      - "127.0.0.1:14001:8080"
+      - "0.0.0.0:14001:8080"
     # Default command used when running `docker compose up`
     command: >
       trade
@@ -34,3 +34,14 @@ services:
       --db-url sqlite:////freqtrade/user_data/tradesv3.sqlite
       --config /freqtrade/user_data/config.json
       --strategy UniversalMACD
+  
+  freqtrade-webserver:
+      image: freqtradeorg/freqtrade:stable
+      restart: unless-stopped
+      container_name: freqtrade-webserver
+      volumes:
+        - "./user_data:/freqtrade/user_data"
+      ports:
+        - "0.0.0.0:14000:8080"
+      command: >
+        webserver
