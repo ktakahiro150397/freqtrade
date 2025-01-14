@@ -1260,7 +1260,7 @@ def test_create_dry_run_order_market_fill(
 @pytest.mark.parametrize("exchange_name", EXCHANGES)
 def test_create_order(default_conf, mocker, side, ordertype, rate, marketprice, exchange_name):
     api_mock = MagicMock()
-    order_id = f"test_prod_{side}_{randint(0, 10 ** 6)}"
+    order_id = f"test_prod_{side}_{randint(0, 10**6)}"
     api_mock.options = {} if not marketprice else {"createMarketBuyOrderRequiresPrice": True}
     api_mock.create_order = MagicMock(
         return_value={"id": order_id, "info": {"foo": "bar"}, "symbol": "XLTCUSDT", "amount": 1}
@@ -1339,7 +1339,7 @@ def test_buy_dry_run(default_conf, mocker, exchange_name):
 @pytest.mark.parametrize("exchange_name", EXCHANGES)
 def test_buy_prod(default_conf, mocker, exchange_name):
     api_mock = MagicMock()
-    order_id = f"test_prod_buy_{randint(0, 10 ** 6)}"
+    order_id = f"test_prod_buy_{randint(0, 10**6)}"
     order_type = "market"
     time_in_force = "gtc"
     api_mock.options = {}
@@ -1460,7 +1460,7 @@ def test_buy_prod(default_conf, mocker, exchange_name):
 @pytest.mark.parametrize("exchange_name", EXCHANGES)
 def test_buy_considers_time_in_force(default_conf, mocker, exchange_name):
     api_mock = MagicMock()
-    order_id = f"test_prod_buy_{randint(0, 10 ** 6)}"
+    order_id = f"test_prod_buy_{randint(0, 10**6)}"
     api_mock.options = {}
     api_mock.create_order = MagicMock(
         return_value={"id": order_id, "symbol": "ETH/BTC", "info": {"foo": "bar"}}
@@ -1537,7 +1537,7 @@ def test_sell_dry_run(default_conf, mocker):
 @pytest.mark.parametrize("exchange_name", EXCHANGES)
 def test_sell_prod(default_conf, mocker, exchange_name):
     api_mock = MagicMock()
-    order_id = f"test_prod_sell_{randint(0, 10 ** 6)}"
+    order_id = f"test_prod_sell_{randint(0, 10**6)}"
     order_type = "market"
     api_mock.options = {}
     api_mock.create_order = MagicMock(
@@ -1617,7 +1617,7 @@ def test_sell_prod(default_conf, mocker, exchange_name):
 @pytest.mark.parametrize("exchange_name", EXCHANGES)
 def test_sell_considers_time_in_force(default_conf, mocker, exchange_name):
     api_mock = MagicMock()
-    order_id = f"test_prod_sell_{randint(0, 10 ** 6)}"
+    order_id = f"test_prod_sell_{randint(0, 10**6)}"
     api_mock.create_order = MagicMock(
         return_value={"id": order_id, "symbol": "ETH/BTC", "info": {"foo": "bar"}}
     )
@@ -1686,6 +1686,7 @@ def test_get_balances_prod(default_conf, mocker, exchange_name):
     api_mock.fetch_balance = MagicMock(
         return_value={"1ST": balance_item, "2ND": balance_item, "3RD": balance_item}
     )
+    api_mock.commonCurrencies = {}
     default_conf["dry_run"] = False
     exchange = get_patched_exchange(mocker, default_conf, api_mock, exchange=exchange_name)
     assert len(exchange.get_balances()) == 3
@@ -2120,7 +2121,7 @@ def test___now_is_time_to_refresh(default_conf, mocker, exchange_name, time_mach
     # not refreshed yet
     assert exchange._now_is_time_to_refresh(pair, "5m", candle_type) is True
 
-    last_closed_candle = (start_dt - timedelta(minutes=5)).timestamp()
+    last_closed_candle = dt_ts(start_dt - timedelta(minutes=5))
     exchange._pairs_last_refresh_time[(pair, "5m", candle_type)] = last_closed_candle
 
     # next candle not closed yet
@@ -2523,7 +2524,7 @@ def test_refresh_latest_ohlcv_cache(mocker, default_conf, candle_type, time_mach
     assert len(res[pair1]) == 99
     assert len(res[pair2]) == 99
     assert exchange._klines
-    assert exchange._pairs_last_refresh_time[pair1] == ohlcv[-2][0] // 1000
+    assert exchange._pairs_last_refresh_time[pair1] == ohlcv[-2][0]
     exchange._api_async.fetch_ohlcv.reset_mock()
 
     # Returned from cache
@@ -2532,7 +2533,7 @@ def test_refresh_latest_ohlcv_cache(mocker, default_conf, candle_type, time_mach
     assert len(res) == 2
     assert len(res[pair1]) == 99
     assert len(res[pair2]) == 99
-    assert exchange._pairs_last_refresh_time[pair1] == ohlcv[-2][0] // 1000
+    assert exchange._pairs_last_refresh_time[pair1] == ohlcv[-2][0]
 
     # Move time 1 candle further but result didn't change yet
     time_machine.move_to(start + timedelta(hours=101))
@@ -2542,7 +2543,7 @@ def test_refresh_latest_ohlcv_cache(mocker, default_conf, candle_type, time_mach
     assert len(res[pair1]) == 99
     assert len(res[pair2]) == 99
     assert res[pair2].at[0, "open"]
-    assert exchange._pairs_last_refresh_time[pair1] == ohlcv[-2][0] // 1000
+    assert exchange._pairs_last_refresh_time[pair1] == ohlcv[-2][0]
     refresh_pior = exchange._pairs_last_refresh_time[pair1]
 
     # New candle on exchange - return 100 candles - but skip one candle so we actually get 2 candles
@@ -2560,8 +2561,8 @@ def test_refresh_latest_ohlcv_cache(mocker, default_conf, candle_type, time_mach
     assert res[pair2].at[0, "open"]
     assert refresh_pior != exchange._pairs_last_refresh_time[pair1]
 
-    assert exchange._pairs_last_refresh_time[pair1] == ohlcv[-2][0] // 1000
-    assert exchange._pairs_last_refresh_time[pair2] == ohlcv[-2][0] // 1000
+    assert exchange._pairs_last_refresh_time[pair1] == ohlcv[-2][0]
+    assert exchange._pairs_last_refresh_time[pair2] == ohlcv[-2][0]
     exchange._api_async.fetch_ohlcv.reset_mock()
 
     # Retry same call - from cache
@@ -6220,7 +6221,7 @@ def test_get_liquidation_price(
 )
 def test_stoploss_contract_size(mocker, default_conf, contract_size, order_amount):
     api_mock = MagicMock()
-    order_id = f"test_prod_buy_{randint(0, 10 ** 6)}"
+    order_id = f"test_prod_buy_{randint(0, 10**6)}"
 
     api_mock.create_order = MagicMock(
         return_value={
