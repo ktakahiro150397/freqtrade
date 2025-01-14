@@ -4,7 +4,7 @@ from pandas import DataFrame
 from freqtrade.strategy import IStrategy
 
 
-class MyStrategy(IStrategy):
+class SMAStrategy(IStrategy):
     timeframe = "15m"
 
     # set the initial stoploss to -10%
@@ -17,22 +17,28 @@ class MyStrategy(IStrategy):
         # generate values for technical analysis indicators
         dataframe["rsi"] = ta.RSI(dataframe, timeperiod=14)
 
+        # SMAを計算
+        dataframe["sma_7"] = ta.SMA(dataframe, timeperiod=7)
+        dataframe["sma_14"] = ta.SMA(dataframe, timeperiod=14)
+
         return dataframe
 
     def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         # generate entry signals based on indicator values
-        dataframe.loc[(dataframe["rsi"] < 30), ["enter_long", "enter_tag"]] = (1, "buy_signal_rsi")
 
-        # 動作確認用に、常にロングエントリーする
-        # dataframe["enter_long"] = 1
+        # sma_14 < sma_7 の場合、エントリー
+        dataframe.loc[dataframe["sma_14"] < dataframe["sma_7"], ["enter_long", "enter_tag"]] = (
+            1,
+            "buy_signal_sma",
+        )
 
         return dataframe
 
     def populate_exit_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
-        # generate exit signals based on indicator values
-        dataframe.loc[(dataframe["rsi"] > 70), ["exit_long", "exit_tag"]] = (1, "exit_rsi")
-
-        # 動作確認用に、最新以外のロングポジションをクローズする
-        # dataframe.loc[dataframe["close"].shift(-1).notna(), "exit_long"] = 1
+        # sma_7 > sma_14 の場合、エグジット
+        dataframe.loc[dataframe["sma_7"] > dataframe["sma_14"], ["exit_long", "exit_tag"]] = (
+            1,
+            "exit_signal_sma",
+        )
 
         return dataframe
